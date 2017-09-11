@@ -1,0 +1,80 @@
+$combined-state-selectors: true !default;
+
+$element-separator: "__" !default;
+
+$modifier-separator: "--" !default;
+
+$state-prefix: "is" !default;
+
+@function selectorToString($selector) {
+  $selector: inspect($selector);
+  $selector: str-slice($selector, 2, -2);
+  @return $selector;
+}
+
+@function containsModifier($selector) {
+  $selector: selectorToString($selector);
+  @if str-index($selector, $modifier-separator) {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function getBlock($selector) {
+  $selector: selectorToString($selector);
+  $modifier-start: str-index($selector, $modifier-separator) - 1;
+  @return str-slice($selector, 0, $modifier-start);
+}
+
+@mixin block($name) {
+  .#{$name} {
+    @content;
+  }
+}
+
+@mixin element($name) {
+  $selector: &;
+  $block: getBlock($selector);
+  @if containsModifier($selector) {
+    @at-root {
+      #{$selector} {
+        #{$block+$element-separator+$name} {
+          @content;
+        }
+      }
+    }
+  } @else {
+    @at-root {
+      #{$selector+$element-separator+$name} {
+        @content;
+      }
+    }
+  }
+}
+
+@mixin modifier($name) {
+  $selector: &;
+  @at-root {
+    &#{$modifier-separator}#{$name} {
+      @extend #{$selector};
+      @content;
+    }
+  }
+}
+
+@mixin state($state, $prefix: $state-prefix) {
+  @if $combined-state-selectors == true {
+    @at-root {
+      &.#{$prefix}-#{$state} {
+        @content;
+      }
+    }
+  } @else {
+    @at-root {
+      &#{$modifier-separator}#{$prefix}-#{$state} {
+        @content;
+      }
+    }
+  }
+}
