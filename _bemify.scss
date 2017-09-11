@@ -35,8 +35,8 @@ $state-prefix: "is" !default;
 
 @mixin element($name) {
   $selector: &;
-  $block: getBlock($selector);
   @if containsModifier($selector) {
+    $block: getBlock($selector);
     @at-root {
       #{$selector} {
         #{$block+$element-separator+$name} {
